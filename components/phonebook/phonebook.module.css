@@ -1,0 +1,92 @@
+* {
+  font-family: "Franklin Gothic Medium", "Arial Narrow", Arial, sans-serif;
+  margin: 0;
+  margin-bottom: 10px;
+  padding: 0;
+}
+h2 {
+  text-align: center;
+}
+label {
+  text-align: start;
+  display: block;
+  font-size: 14pt;
+  padding-left: 25px;
+}
+.all_wrapper {
+  max-width: 1000px;
+}
+.container {
+  border: solid 1px black;
+  border-radius: 5px;
+  max-width: 900px;
+  margin-left: auto;
+  margin-right: auto;
+  padding: 10px;
+  text-align: center;
+  background-color: rgb(211, 250, 237);
+}
+.input_field {
+  padding-left: 3px;
+  font-size: 12pt;
+  width: 300px;
+}
+.newcontact_showfav_button {
+  margin-left: auto;
+  padding: 3px 5px 3px 5px;
+  border: none;
+  border-radius: 5px;
+  height: 40px;
+  width: 300px;
+  background-color: dodgerblue;
+  overflow: hidden;
+  display: block;
+  font-size: 12pt;
+}
+.show_all_button {
+  composes: newcontact_showfav_button;
+  background-color: black;
+  color: dodgerblue;
+}
+.add_edit_button {
+  composes: newcontact_showfav_button;
+  margin-right: auto;
+}
+.managing_button {
+  padding: 3px 5px 3px 5px;
+  border-radius: 5px;
+  border: none;
+  height: auto;
+  width: 100px;
+  background-color: limegreen;
+  overflow: hidden;
+  font-size: 11pt;
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+}
+.fav_inverted_button {
+  composes: managing_button;
+  background-color: black;
+  color: limegreen;
+}
+.transaction_history {
+  text-align: center;
+  margin-left: auto;
+  margin-right: auto;
+}
+th,
+td {
+  width: 250px;
+  height: 40px;
+  font-weight: lighter;
+  font-size: 12pt;
+}
+th,
+td:nth-child(n + 4) {
+  width: 150px;
+}
+th {
+  background-color: rgb(18, 2, 87);
+  color: cornsilk;
+}
