@@ -1,13 +1,17 @@
 import React from "react";
-import styles from "./phonebook.module.css";
 import { v4 as uuidv4 } from "uuid";
+import { Link } from "react-router-dom";
+import Button from "react-bootstrap/Button";
+import Table from "react-bootstrap/Table";
+import Container from "react-bootstrap/Container";
+import Smile from "../../images/winking-face.png";
 
 export default function ContactsList({
   contacts,
   onDeleteItem,
   onEditContact,
   onAddToFavToggle,
-  onDisplayFav,
+  onAddTestContacts,
 }) {
   const markup = contacts.map((contact) => (
     <TableItem
@@ -27,36 +31,38 @@ export default function ContactsList({
         <td>{Phone}</td>
         <td>{Email}</td>
         <td>
-          <button
-            className={
-              favourite ? styles.fav_inverted_button : styles.managing_button
-            }
-            type="button"
-            onClick={onAddToFavToggle}
-            id={item.id}
-          >
-            {favourite ? "З обраних" : "В обрані"}
-          </button>
-        </td>
-        <td>
-          <button
-            className={styles.managing_button}
-            type="button"
-            onClick={onEditContact}
-            id={item.id}
-          >
-            Редагувати
-          </button>
-        </td>
-        <td>
-          <button
-            className={styles.managing_button}
-            type="button"
-            onClick={onDeleteItem}
-            id={item.id}
-          >
-            Видалити
-          </button>
+          <Container className="flex_container_spased">
+            <Button
+              variant={favourite ? "light" : "secondary"}
+              className="manage_fav_button"
+              size="sm"
+              type="button"
+              onClick={onAddToFavToggle}
+              id={item.id}
+            >
+              {favourite ? "Out of favourites" : "Add to favourites"}
+            </Button>
+
+            <Link to="/editcontact">
+              <Button
+                variant="secondary"
+                type="button"
+                onClick={onEditContact}
+                id={item.id}
+              >
+                Edit
+              </Button>
+            </Link>
+
+            <Button
+              variant="secondary"
+              type="button"
+              onClick={onDeleteItem}
+              id={item.id}
+            >
+              Delete
+            </Button>
+          </Container>
         </td>
       </tr>
     );
@@ -64,25 +70,34 @@ export default function ContactsList({
 
   return (
     <>
-      <button
-        className={styles.newcontact_showfav_button}
-        type="button"
-        onClick={onDisplayFav}
-      >
-        Показати обрані контакти
-      </button>
+      <h2>Contacts List</h2>
+      <Container className="flex_container_spased custom_wrapper">
+        <Link to="/addnewcontact">
+          <Button variant="primary" size="lg">
+            Add new contact
+          </Button>{" "}
+        </Link>
+        <Link to="/showfavourites">
+          <Button variant="primary" size="lg">
+            Show favourites
+          </Button>{" "}
+        </Link>
+        <Button variant="outline-primary" size="lg" onClick={onAddTestContacts}>
+          <img src={Smile} alt="" width="40" /> Boring manual adding?
+        </Button>{" "}
+      </Container>
 
-      <table className={styles.transaction_history}>
+      <Table responsive striped bordered hover size="sm" variant="dark">
         <thead>
           <tr>
-            <th>Ім'я</th>
-            <th>Номер телефону</th>
-            <th>Ел. пошта</th>
+            <th>Name</th>
+            <th>Phone</th>
+            <th>Email</th>
           </tr>
         </thead>
 
         <tbody>{markup}</tbody>
-      </table>
+      </Table>
     </>
   );
 }

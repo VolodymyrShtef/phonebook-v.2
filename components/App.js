@@ -3,8 +3,10 @@ import React, { Component } from "react";
 import ContactsList from "./phonebook/ContactsList";
 import ShowFav from "./phonebook/ShowFav";
 import AddContactForm from "./phonebook/AddContactForm";
-import styles from "./phonebook/phonebook.module.css";
+import EditContactForm from "./phonebook/EditContactForm";
+
 import contacts from "./phonebook/firebase";
+import testData from "../components/testData";
 
 import { v4 as uuidv4 } from "uuid";
 
@@ -12,14 +14,33 @@ import firebase from "firebase/app";
 import "firebase/auth";
 import StyledFirebaseAuth from "react-firebaseui/StyledFirebaseAuth";
 import "firebase/firestore";
-import ListHeader from "./phonebook/ListHaeader";
+
+import { Route, Switch } from "react-router-dom";
+
+import "bootstrap/dist/css/bootstrap.min.css";
+import Container from "react-bootstrap/Container";
+import Button from "react-bootstrap/Button";
+
+import "./styles.css";
+import Logo from "../images/phone-book.svg";
 
 export default class App extends Component {
   state = {
     contacts: [],
     isSignedIn: false,
-    currentShowing: "list",
     editID: "",
+  };
+
+  addTestContacts = () => {
+    const test = async () => {
+      await this.setState({
+        contacts: testData(),
+      });
+    };
+    test().then(() => {
+      this.storeInDB();
+      this.showContacts(firebase.auth().currentUser.displayName);
+    });
   };
 
   uiConfig = {
@@ -39,9 +60,9 @@ export default class App extends Component {
     });
   }
 
-  componentDidUpdate(prevProps, prevState) {
-    if (prevState.contacts === this.state.contacts) return;
-    if (prevState.contacts.length > this.state.contacts.length) return;
+  // componentDidUpdate => storeInDB(), який викликається з addContact
+  // i editContact з async-await
+  storeInDB = () => {
     this.state.contacts.forEach((contact) => {
       contacts
         .collection(firebase.auth().currentUser.displayName)
@@ -63,10 +84,6 @@ export default class App extends Component {
           console.error("Error adding ", error);
         });
     });
-  }
-
-  resetToList = () => {
-    this.setState({ currentShowing: "list", editID: "" });
   };
 
   showContacts = (name) => {
@@ -82,10 +99,6 @@ export default class App extends Component {
       });
   };
 
-  displayFavourite = () => {
-    this.setState({ currentShowing: "fav" });
-  };
-
   filterFavs = () => {
     const favContacts = this.state.contacts.filter(
       (contact) => contact.favourite
@@ -93,28 +106,27 @@ export default class App extends Component {
     return favContacts;
   };
 
-  handleNewContact = () => {
-    this.setState({ currentShowing: "add" });
-  };
-
-  addContact = ({ name, tel, email }) => {
+  addContact = ({ name, tel, email }, history) => {
     if (this.state.contacts.find((contact) => contact.Phone === tel)) {
-      alert("Контакт з таким номером телефону уже існує");
+      alert("Contact with entered phone number already exists");
       return;
     }
-    this.setState({
-      contacts: [
-        ...this.state.contacts,
-        {
-          id: uuidv4(),
-          Name: name,
-          Phone: tel,
-          Email: email,
-          favourite: false,
-        },
-      ],
-    });
-    this.resetToList();
+    const newState = async () => {
+      await this.setState({
+        contacts: [
+          ...this.state.contacts,
+          {
+            id: uuidv4(),
+            Name: name,
+            Phone: tel,
+            Email: email,
+            favourite: false,
+          },
+        ],
+      });
+    };
+    newState().then(() => this.storeInDB());
+    history.push("/");
   };
 
   addToFavToggle = (e) => {
@@ -131,31 +143,30 @@ export default class App extends Component {
   };
 
   handleEditContact = (e) => {
-    this.setState({ currentShowing: "edit", editID: e.target.id });
+    this.setState({ editID: e.target.id });
   };
 
+  // forEach -> find
   getPropsOfEditingContact = () => {
-    let props = {};
-    this.state.contacts.forEach((contact) => {
-      if (contact.id === this.state.editID) {
-        props = {
-          name: contact.Name,
-          tel: contact.Phone,
-          email: contact.Email,
-        };
-      }
-    });
-    return props;
+    if (!this.state.editID) return;
+    const editingContact = this.state.contacts.find(
+      (contact) => contact.id === this.state.editID
+    );
+    return {
+      name: editingContact.Name,
+      tel: editingContact.Phone,
+      email: editingContact.Email,
+    };
   };
 
-  editContact = ({ name, tel, email }) => {
+  editContact = ({ name, tel, email }, history) => {
     const idUpdate = this.state.editID;
     if (
       this.state.contacts.find(
         (contact) => contact.Phone === tel && contact.id !== idUpdate
       )
     ) {
-      alert("Контакт з таким номером телефону уже існує");
+      alert("Contact with entered phone number already exists");
       return;
     }
     const updatedContacts = this.state.contacts.map((contact) =>
@@ -169,11 +180,15 @@ export default class App extends Component {
           }
         : { ...contact }
     );
-    this.setState({
-      contacts: updatedContacts,
-      editID: "",
-    });
-    this.resetToList();
+
+    const newState = async () => {
+      await this.setState({
+        contacts: updatedContacts,
+        editID: "",
+      });
+    };
+    newState().then(() => this.storeInDB());
+    history.push("/");
   };
 
   deleteItem = (e) => {
@@ -196,68 +211,88 @@ export default class App extends Component {
   };
 
   render() {
-    const { isSignedIn, currentShowing, contacts } = this.state;
+    const { isSignedIn, contacts } = this.state;
     return (
-      <div className={styles.all_wrapper}>
+      <>
         {!isSignedIn ? (
-          <StyledFirebaseAuth
-            uiConfig={this.uiConfig}
-            firebaseAuth={firebase.auth()}
-          />
+          <>
+            <h2>Sign in, please</h2>
+            <Route
+              path="/"
+              render={(props) => (
+                <StyledFirebaseAuth
+                  {...props}
+                  uiConfig={this.uiConfig}
+                  firebaseAuth={firebase.auth()}
+                />
+              )}
+            />
+          </>
         ) : (
           <>
-            <h2>Ви ввійшли як: {firebase.auth().currentUser.displayName}</h2>
-            <button
-              className={styles.managing_button}
-              onClick={() => firebase.auth().signOut()}
-            >
-              Sign out!
-            </button>
+            <Container className="custom_wrapper">
+              <Container className="flex_container">
+                <img className="img_main" src={Logo} alt="" width="50" />
+                <h2>
+                  Welcome to Phonebook App,{" "}
+                  {firebase.auth().currentUser.displayName}
+                </h2>
+              </Container>
+              <Button variant="dark" onClick={() => firebase.auth().signOut()}>
+                Sign out!
+              </Button>
+            </Container>
 
-            {(currentShowing === "list" || currentShowing === "fav") && (
-              <div className={styles.container}>
-                <ListHeader
-                  fav={this.state.currentShowing}
-                  onHandleNewContact={this.handleNewContact}
-                />
-
-                {contacts.length > 0 && (
-                  <>
-                    {currentShowing === "list" && (
+            <Container fluid className="backgr_wrapper">
+              <Container className="content_wrapper">
+                <Switch>
+                  <Route
+                    exact
+                    path="/"
+                    render={(props) => (
                       <ContactsList
+                        {...props}
                         contacts={contacts}
-                        onDisplayFav={this.displayFavourite}
                         onAddToFavToggle={this.addToFavToggle}
                         onEditContact={this.handleEditContact}
                         onDeleteItem={this.deleteItem}
+                        onAddTestContacts={this.addTestContacts}
                       />
                     )}
-                    {currentShowing === "fav" && (
-                      <ShowFav
-                        contacts={this.filterFavs()}
-                        onDisplayAll={this.resetToList}
-                      />
-                    )}
-                  </>
-                )}
-              </div>
-            )}
+                  />
 
-            {(currentShowing === "add" || currentShowing === "edit") && (
-              <div className={styles.container}>
-                <AddContactForm
-                  onBackward={this.resetToList}
-                  onAddContact={this.addContact}
-                  onEditContact={this.editContact}
-                  addOrEdit={this.state.currentShowing}
-                  editID={this.state.editID}
-                  contactProps={this.getPropsOfEditingContact()}
-                />
-              </div>
-            )}
+                  <Route
+                    path="/addnewcontact"
+                    render={(props) => (
+                      <AddContactForm
+                        {...props}
+                        onAddContact={this.addContact}
+                      />
+                    )}
+                  />
+
+                  <Route
+                    path="/editcontact"
+                    render={(props) => (
+                      <EditContactForm
+                        {...props}
+                        onEditContact={this.editContact}
+                        editID={this.state.editID}
+                        contactProps={this.getPropsOfEditingContact()}
+                      />
+                    )}
+                  />
+
+                  <Route
+                    path="/showfavourites"
+                    render={(props) => <ShowFav contacts={this.filterFavs()} />}
+                  />
+                </Switch>
+              </Container>
+            </Container>
           </>
         )}
-      </div>
+      </>
     );
   }
 }

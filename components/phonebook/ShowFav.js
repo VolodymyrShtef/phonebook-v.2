@@ -1,8 +1,11 @@
 import React from "react";
-import styles from "./phonebook.module.css";
 import { v4 as uuidv4 } from "uuid";
+import { Link } from "react-router-dom";
+import Button from "react-bootstrap/Button";
+import Table from "react-bootstrap/Table";
+import Container from "react-bootstrap/Container";
 
-export default function ShowFav({ contacts, onDisplayAll }) {
+export default function ShowFav({ contacts }) {
   const markup = contacts.map((contact) => (
     <TableItem key={uuidv4()} item={contact} />
   ));
@@ -20,25 +23,31 @@ export default function ShowFav({ contacts, onDisplayAll }) {
 
   return (
     <>
-      <button
-        className={styles.show_all_button}
-        type="button"
-        onClick={onDisplayAll}
-      >
-        Показати всі контакти
-      </button>
+      <h2>Favourite Contacts</h2>
+      <Container className="flex_container_spased custom_wrapper">
+        <Link to="/addnewcontact">
+          <Button variant="primary" size="lg">
+            Add new contact
+          </Button>
+        </Link>
+        <Link to="/">
+          <Button variant="primary" size="lg">
+            Show all
+          </Button>
+        </Link>
+      </Container>
 
-      <table className={styles.transaction_history}>
+      <Table responsive striped bordered hover size="sm" variant="dark">
         <thead>
           <tr>
-            <th>Ім'я</th>
-            <th>Номер телефону</th>
-            <th>Ел. пошта</th>
+            <th>Name</th>
+            <th>Phone</th>
+            <th>Email</th>
           </tr>
         </thead>
 
         <tbody>{markup}</tbody>
-      </table>
+      </Table>
     </>
   );
 }

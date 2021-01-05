@@ -1,0 +1,52 @@
+body {
+  text-align: center;
+}
+.backgr_wrapper {
+  background-color: #d5e1df;
+}
+.add_contact_wrapper {
+  background-color: #343a40;
+  max-width: 800px;
+  padding-top: 15px;
+  padding-bottom: 15px;
+  margin-bottom: 15px;
+  margin-top: 15px;
+}
+.custom_wrapper {
+  margin-top: 15px;
+  margin-bottom: 15px;
+}
+.content_wrapper {
+  padding-top: 30px;
+  padding-bottom: 40px;
+}
+.flex_container,
+.flex_container_spased,
+.flex_container_spasedB {
+  display: flex;
+  align-items: center;
+}
+.flex_container {
+  justify-content: center;
+  max-width: 800px;
+  position: relative;
+}
+.flex_container_spased {
+  justify-content: space-around;
+}
+.flex_container_spasedB {
+  justify-content: space-between;
+}
+.img_main {
+  margin-right: 15px;
+}
+.input_label {
+  width: 85px;
+}
+.back_button {
+  position: absolute;
+  right: 10px;
+}
+.manage_fav_button {
+  width: 125px;
+}
